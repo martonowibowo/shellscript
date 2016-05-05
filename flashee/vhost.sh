@@ -1,33 +1,31 @@
 #!/bin/bash
 
 domain_name="$1"
-folder="/opt/public_html/flashe"
+folder="/opt/public_html/flashee/current/"
 ipserver="103.23.21.224"
 store_id="$2"
 condition="$3"
 
 if [ "$3" = "PUT" ]
 then
-    echo "Delete Store ID '$2'"
+    #echo "Delete Store ID '$2'"
     rm -rf /etc/nginx/sites-available/$3.conf
     sh delete_zone.sh ${domain_name}
 
 elif [ "$3" = "POST" ]
   then
-      echo "Insert"
+      #echo "Insert"
       echo "
       server {
                   listen 80;
 
-              domain_name ${domain_name};
+              server_name ${domain_name};
               root ${folder};
 
       	location / {
               index index.html index.php; ## Allow a static html file to be shown first
               try_files \$uri \$uri/ @handler; ## If missing pass the URI to Magento's front handler
               expires 30d; ## Assume all files are cachable
-          }
-
           }
 
           location  /. { ## Disable .htaccess and other hidden files
@@ -59,11 +57,19 @@ elif [ "$3" = "POST" ]
       }
       " > /etc/nginx/sites-available/$2.conf
       sleep 1
-      ln -svf /etc/nginx/sites-available/$2.conf /etc/nginx/sites-enabled/
-      sleep 1
-      /etc/init.d/nginx reload
-      sleep 1
-      sh add_zone.sh ${domain_name}
+      if symlink=$(ln -svf /etc/nginx/sites-available/$2.conf /etc/nginx/sites-enabled/ 2>&1 );then
+        echo $symlink
+        sleep 1
+            if restart_nginx=$(/etc/init.d/nginx reload | grep fail);then
+                sleep 1
+                echo '{"error":true,"message":"NGINX RESTART FAILED"}'
+              else
+                echo $restart_nginx
+                sh /usr/local/sbin/flashee/add_zone.sh ${domain_name}
+              fi
+      else
+        echo '{"error":true,"message":"'$symlink'-FAILED"}'
+      fi
   else
-      echo "Wrong Condition"
+echo '{"error":true,"message":"Check Your Input - FAILED"}'
   fi
