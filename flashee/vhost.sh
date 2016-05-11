@@ -10,7 +10,7 @@ if [ "$3" = "PUT" ]
 then
     #echo "Delete Store ID '$2'"
     rm -rf /etc/nginx/sites-available/$3.conf
-    sh delete_zone.sh ${domain_name}
+    sh /home/martonowibowo/Documents/shellscript/flashee/delete_zone.sh ${domain_name}
 
 elif [ "$3" = "POST" ]
   then
@@ -28,7 +28,7 @@ elif [ "$3" = "POST" ]
               expires 30d; ## Assume all files are cachable
           }
 
-          location  /. { ## Disable .htaccess and other hidden files
+          location  /. { ## Disable .htaccess and otheric hidden files
               return 404;
           }
 
@@ -57,16 +57,12 @@ elif [ "$3" = "POST" ]
       }
       " > /etc/nginx/sites-available/$2.conf
       sleep 1
-      if symlink=$(ln -svf /etc/nginx/sites-available/$2.conf /etc/nginx/sites-enabled/ 2>&1 );then
+    if symlink=$(ln -svf /etc/nginx/sites-available/$2.conf /etc/nginx/sites-enabled/ 2>&1 );then
         echo $symlink
         sleep 1
-            if restart_nginx=$(/etc/init.d/nginx reload | grep fail);then
-                sleep 1
-                echo '{"error":true,"message":"NGINX RESTART FAILED"}'
-              else
+          restart_nginx=$(/etc/init.d/nginx reload)
                 echo $restart_nginx
-                sh /usr/local/sbin/flashee/add_zone.sh ${domain_name}
-              fi
+                sh /home/martonowibowo/Documents/shellscript/flashee/add_zone.sh ${domain_name}
       else
         echo '{"error":true,"message":"'$symlink'-FAILED"}'
       fi
