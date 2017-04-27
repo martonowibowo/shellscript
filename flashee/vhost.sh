@@ -72,11 +72,11 @@ fi
 
 if [ "$4" = "YES" ]
  then
-a+="	      \t\tfastcgi_param  BASE_URL      'https://${domain_name}/';\n
+a+="	      \t\tfastcgi_param  BASE_URL 'https://${domain_name}/';\n
       	\t}\n
       }"
 else
-a+="         \t\tfastcgi_param  BASE_URL	   'http://${domain_name}/';\n
+a+="         \t\tfastcgi_param  BASE_URL 'http://${domain_name}/';\n
         \t}\n
       }"
 fi 
