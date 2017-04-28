@@ -10,8 +10,8 @@ sslstatus="$4"
 if [ "$3" = "PUT" ]
 then
     #echo "Delete Store ID '$2'"
-    rm -rf /etc/nginx/sites-available/$3.conf
-    sh /home/martonowibowo/Documents/shellscript/flashee/delete_zone.sh ${domain_name}
+    rm -rfv /etc/nginx/sites-available/$3.conf
+    #sh /home/martonowibowo/Documents/shellscript/flashee/delete_zone.sh ${domain_name}
 
 elif [ "$3" = "POST" ] 
   then
@@ -23,21 +23,37 @@ then
 	\tlisten 80;\n
 	\tserver_name ${domain_name};\n
 	\treturn 301 https://\$host\$request_uri;\n
-        }\n"
+        }\n\n"
 else
 a+="server {"
 fi
 
 if [ "$4" = "YES" ]
  then
-   a+="\n\t\tlisten 443 ssl;\n"
+   a+="\n\t\tlisten 443 ssl;\n
+
+\n\t\tssl on;\n  
+    \t\tssl_certificate      /etc/nginx/ssl/${domain_name}.crt; \n
+    \t\tssl_certificate_key  /etc/nginx/ssl/${domain_name}.key; \n
+
+\t\tssl_protocols TLSv1.2 TLSv1.1 TLSv1 SSLv2; \n
+\t\tssl_prefer_server_ciphers on; \n
+\t\tssl_ciphers ECDH+AESGCM:DH+AESGCM:ECDH+AES256:DH+AES256:ECDH+AES128:DH+AES:ECDH+3DES:DH+3DES:RSA+AESGCM:RSA+AES:RSA+3DES:!aNULL:!MD5:!DSS; \n
+
+    \t\tssl_session_cache shared:SSL:1m; \n
+    \t\tssl_session_timeout  5m; \n\n\n
+"
 else
  a+="\n\t\tlisten 80;\n"
 fi
 
+
     a+="     
-		\t\tserver_name ${domain_name};\n
-              \t\troot ${folder};\n
+	     \t\tserver_name ${domain_name};\n
+              \t\troot ${folder};\n\n
+
+	\t\t access_log /var/log/nginx/${domain_name}_access.log buffer=4k;\n
+	\t\t error_log	/var/log/nginx/${domain_name}_error.log buffer=4k;\n\n
 
       	\tlocation / {\n
               \t\tindex index.html index.php; ## Allow a static html file to be shown first\n
