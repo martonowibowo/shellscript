@@ -10,7 +10,8 @@ sslstatus="$4"
 if [ "$3" = "PUT" ]
 then
     #echo "Delete Store ID '$2'"
-    rm -rfv /etc/nginx/sites-available/$3.conf
+    unlink /etc/nginx/sites-enabled/${store_id}.conf
+    rm -rfv /etc/nginx/sites-available/${store_id}.conf
     #sh /home/martonowibowo/Documents/shellscript/flashee/delete_zone.sh ${domain_name}
 
 elif [ "$3" = "POST" ] 
@@ -52,8 +53,8 @@ fi
 	     \t\tserver_name ${domain_name};\n
               \t\troot ${folder};\n\n
 
-	\t\t access_log /var/log/nginx/${domain_name}_access.log buffer=4k;\n
-	\t\t error_log	/var/log/nginx/${domain_name}_error.log buffer=4k;\n\n
+	\t\t access_log /var/log/nginx/${domain_name}_access.log;\n
+	\t\t error_log	/var/log/nginx/${domain_name}_error.log;\n\n
 
       	\tlocation / {\n
               \t\tindex index.html index.php; ## Allow a static html file to be shown first\n
