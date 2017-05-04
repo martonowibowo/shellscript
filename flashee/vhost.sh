@@ -31,7 +31,9 @@ fi
 
 if [ "$4" = "YES" ]
  then
-   a+="\n\t\tlisten 443 ssl;\n
+   a+="
+   \n\tserver {
+   \n\t\tlisten 443 ssl;\n
 
 \n\t\tssl on;\n  
     \t\tssl_certificate      /etc/nginx/ssl/${domain_name}.crt; \n
