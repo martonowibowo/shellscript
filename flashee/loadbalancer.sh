@@ -83,7 +83,7 @@ fi
 "
 echo -e $a > $BASEDIR/tmp/$2.conf
               scp $BASEDIR/tmp/$2.conf root@172.17.0.2:/etc/nginx/sites-enabled/ #sh /home/martonowibowo/Documents/shellscript/flashee/add_zone.sh ${domain_name}
-              ssh -t root@172.17.0.2 /etc/init.d/nginx restart
+              ssh -t root@172.17.0.2 /etc/init.d/nginx reload
   else
 echo '{"error":true,"message":"Check Your Input - FAILED"}'
   fi
