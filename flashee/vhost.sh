@@ -1,5 +1,5 @@
 #!/bin/bash
-
+DATE=`date +%Y-%m-%d_%H:%M:%S`
 domain_name="$1"
 folder="/opt/public_html/flashee/current/"
 ipserver="103.23.21.224"
@@ -103,14 +103,16 @@ fi
 echo -e $a > /etc/nginx/sites-available/$2.conf
       sleep 1
     if symlink=$(ln -svf /etc/nginx/sites-available/$2.conf /etc/nginx/sites-enabled/ 2>&1 );then
-        echo $symlink
+        echo  $DATE $symlink >> /var/log/create_store.log 
         sleep 1
-          restart_nginx=$(/etc/init.d/nginx reload)
-                echo $restart_nginx
+          restart_nginx=$(/etc/init.d/nginx reload 2>&1)
+                echo  $DATE $restart_nginx >> /var/log/create_store.log 
                 #sh /home/martonowibowo/Documents/shellscript/flashee/add_zone.sh ${domain_name}
       else
+        echo '{"error":true,"message":"'$symlink'-FAILED"}' >> /var/log/create_store.log 
         echo '{"error":true,"message":"'$symlink'-FAILED"}'
       fi
   else
+echo '{"error":true,"message":"Check Your Input - FAILED"}' >> /var/log/create_store.log 
 echo '{"error":true,"message":"Check Your Input - FAILED"}'
   fi

@@ -9,8 +9,8 @@ if echo "${domain_name}" | grep -q "acomindo"
     --data '{"type":"A","name":"'$domain_name'","content":"103.23.21.224","ttl":600}' | grep null);then
       echo '{"error":true,"message":"DOMAIN ADD FAILED"}'
     else
-      echo '{"error":"false","message":"SUCCESS"}'
+      echo '{"error":"false","message":"SUCCESS"}' >> /var/log/create_store.log
     fi
   else
-    echo '{"error":false,"message":"SUCCESS"}'
+    echo '{"error":false,"message":"SUCCESS"}' >> /var/log/create_store.log
 fi
