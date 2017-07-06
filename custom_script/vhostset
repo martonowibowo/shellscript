@@ -1,0 +1,73 @@
+#!/bin/bash
+
+server_name="$1"
+folder="$2"
+
+echo "
+upstream fastcgi_backend {
+     server  127.0.0.1:9100;
+ }
+
+server {
+            listen 80;
+## SSL directives might go here    
+ 
+        server_name ${server_name};
+	
+	access_log /var/log/nginx/${server_name}_access.log slim buffer=4k; 
+	error_log /var/log/nginx/${server_name}_error.log;
+	
+
+	## Set Magento root folder
+	set \$MAGE_ROOT ${folder};
+	## Set main public directory /pub
+	root \$MAGE_ROOT/pub;
+	set \$MAGE_MODE developer;
+
+index index.php;
+autoindex off;
+charset off;
+
+location ~ ^/(app|bin|var|tmp|phpserver|vendor|magento_version|php[mM]y[aA]dmin|pma)/? { deny all; }
+
+location / {
+    try_files \$uri \$uri/ /index.php?\$args;
+}
+location /pub {
+    location ~ ^/pub/media/(downloadable|customer|import|theme_customization/.*\.xml) {
+        deny all;
+    }
+alias \$MAGE_ROOT/pub;
+    add_header X-Frame-Options "SAMEORIGIN";
+}
+
+	## Static location
+        include conf_m2/assets.conf;
+
+        location @static { rewrite /static/(version\d*/)?(.*)$ /static.php?resource=\$2 last; }
+        location @media { try_files \$uri \$uri/ /get.php\$is_args\$args; }
+  
+	## Protect extra directories
+	include conf_m2/extra_protect.conf;
+
+    	location ~ (index|get|static|report|404|503)\.php$ {
+    	try_files \$uri =404;
+    	fastcgi_pass   fastcgi_backend;
+
+    	fastcgi_read_timeout 600s;
+    	fastcgi_connect_timeout 600s;
+    	fastcgi_param  MAGE_MODE \$MAGE_MODE;
+
+    	fastcgi_index  index.php;
+    	fastcgi_param  SCRIPT_FILENAME  \$document_root$fastcgi_script_name;
+    	include        fastcgi_params;
+	}
+
+## Block other undefined php files, possible injections and random malware hooks.
+	location ~* \.php$ { return 404; }
+}
+" > /etc/nginx/sites-available/$1.conf
+sleep 1
+ln -svf /etc/nginx/sites-available/$1.conf /etc/nginx/sites-enabled/
+sleep 1
+/etc/init.d/nginx reload
